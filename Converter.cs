@@ -9,7 +9,7 @@ namespace Twk2txt
   {
 
 
-    Dictionary<int,char> taswordCZ = new Dictionary<int, char>
+    Dictionary<int, char> taswordCZ = new Dictionary<int, char>
     {
       {0x80,'é'},
       {0x81,'ě'},
@@ -43,9 +43,9 @@ namespace Twk2txt
       {0x9C,' '},
       {0x9D,' '},
       {0x9E,' '},
-      {0x9F,' '},      
+      {0x9F,' '},
     };
-     Dictionary<int,char> dtextCZ = new Dictionary<int, char>
+    Dictionary<int, char> dtextCZ = new Dictionary<int, char>
     {
       {0x80,'é'},
       {0x81,'ě'},
@@ -79,7 +79,7 @@ namespace Twk2txt
       {0x9C,' '},
       {0x9D,' '},
       {0x9E,' '},
-      {0x9F,' '},      
+      {0x9F,' '},
     };
 
     private StringBuilder sbTextLine = new StringBuilder();
@@ -90,7 +90,8 @@ namespace Twk2txt
     public Converter(string inputFilePath, string outputFilePath)
     {
       input = File.OpenRead(inputFilePath); //@"text.twk");
-      output = File.OpenWrite(outputFilePath);      
+      output = File.OpenWrite(outputFilePath);
+      //output.Write(new byte[]{0xEF,0xBB,0xBF},0,3);
     }
     public void Convert()
     {
@@ -113,7 +114,7 @@ namespace Twk2txt
           while (repeat > 0)
           {
             WriteChar(lastByte);
-            repeat--; 
+            repeat--;
             // repeat = 0;
           }
 
@@ -123,14 +124,14 @@ namespace Twk2txt
         }
 
       }
-      
-      if (sbTextLine.Length > 0 )
+
+      if (sbTextLine.Length > 0)
       {
         Console.WriteLine(sbTextLine.ToString());
-        output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()),0,sbTextLine.Length);
+        output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()), 0, sbTextLine.Length);
       }
-       output.Flush();
-        
+      output.Flush();
+
     }
 
     private void WriteChar(int charInt)
@@ -144,9 +145,9 @@ namespace Twk2txt
       {
         Console.WriteLine(sbTextLine.ToString());
 
-        output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()),0,64);
+        output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()), 0, 64);
         output.WriteByte(0x0D);
-        output.WriteByte(0x0A);
+        //output.WriteByte(0x0A);
 
         sbTextLine.Clear();
       }
