@@ -16,7 +16,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/Twk2txt.dll",
-            "args": [],
+            "args": ["/Users/macwhite/VSCode/Twk2txt/GENS3E.bin","/Users/macwhite/VSCode/Twk2txt/GENS3E.txt"],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,
             "console": "internalConsole"

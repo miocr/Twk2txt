@@ -1,0 +1,249 @@
+prikazu pred uspesnym ukoncenim cele kompilace, ktera je  zrejma
+ze zpravy: 'Executes nnnnn'.                                    
+   Byla-li  zvolena  cinnost  1,  vytvori  se  abecedni   seznam
+pouzitych  symbolu  s  prislusnymi  hodnotami.   Pocet    vstupu
+zobrazenych na jedne radce muze byt zmenen  pomoci  POKE  'Start
+GENS 3 + 50' s prislusnou hodnotou; standardni hodnota je 2.    
+                                                                
+Rizeni se nyni vrati do editoru.                                
+                                                                
+                                                                
+2.1 Format assembleru                                           
+                                                                
+   Kazdy radek textu generovany GENS 3  ma  nasledujici  format,
+kde jsou uvedena prislusna pole:                                
+                                                                
+NAVESTI    MNEMONIKA    OPERANDY       POZNAMKA                 
+Start      LD           HL,label       ;cteni 'label' do HL     
+                                                                
+   Mezerniky a znaky pro tabelaci (vlozene editorem) jsou obecne
+ignorovany.                                                     
+   Radek je zpracovan nasledujicim zpusobem:                    
+Je vyhodnocen prvni znak radku a nasledujici cinnost je  zavisla
+na tomto znaku jak je uvedeno dale:                             
+                                                                
+';'  cely radek je povazovan  za  poznamku  (komentar)  t.j.  je
+     ignorovan                                                  
+'*'  ocekava, ze dalsi znak(y) budou tvorit  prikaz  assembleru.
+     (viz kapitola 2.8). Povazuje vsechny znaky  nasledujici  za
+     prikazem jako komentar                                     
+' '  (znak konce radku) jednoduse ignoruje radek                
+' '  (mezera nebo znak tabelace) je-li prvni  znak  mezera  nebo
+     znak tabelace pak GENS 3 predpoklada, ze prvni znak,  ktery
+     neni mezera nebo tab, bude zacatek Z80 mnemoniky           
+                                                                
+   Je-li prvni znak jiny nez  je  vyse  uvedeno,  pak  assembler
+predpoklada symbol - viz kap. 2.2.                              
+   Po  zpracovani  platneho  navesti  nebo  je-li  prvni    znak
+mezera/tab, pak assembler hleda dalsi znak ktery neni mezera/tab
+a ocekava, ze to bude bud konec radku nebo zacatek Z80 mnemoniky
+(viz priloha 2), ktera ma az 4 znaky a je  ukoncena  mezerou/tab
+nebo znakem konce radku. Je-li mnemonika platna a vyzaduje jeden
+nebo  vice  operandu,  pak  jsou  mezery/tab  vynechany  a    je
+zpracovano pole operandu.                                       
+   Navesti mohou tvorit samostatny radek; uzitecne  pro  zvyseni
+prehlednosti.                                                   
+   Komentare mohou byt umisteny kdekoliv za polem operandu  nebo
+nema-li mnemonika argument, pak za polem mnemoniky.             
+                                                                
+2.2 Navesti                                                     
+                                                                
+   Navesti predstavuji az 16 bitovou informaci.                 
+   Navesti muze byt pouzito k oznaceni adresy  urcite  instrukce
+nebo datove oblasti nebo muze byt uzito  jako  konstanta  pomoci
+prikazu EQU (viz kap. 2.6).                                     
+   Je-li navesti prirazena hodnota vetsi nez 8  bitu  a  pak  je
+pouzito jako 8 bitova konstanta, ohlasi assembler chybu.        
+                                                                
+   label EQU  #1234                                             
+         LD   A,label                                           
+                                                                
+zpusobi hlaseni *ERROR* 10 pri druhem prubehu.                  
+   Navesti muze  obsahovat  libovolny  pocet  znaku  (viz  nize)
+nicmene pouze prvnich 6 znaku  je  platnych;  techto  prvnich  6
+znaku musi byt jednoznacne  urceno,  jinak  navesti  nemuze  byt
+rozpoznano (*ERROR* 4). Navesti nesmi byt  tvoreno  rezervovanym
+slovem (viz priloha 2), ac muze byt jeho soucasti.              
+   Znaky, ktere mohou tvorit navesti jsou:  0-9,$  a  A-z.  'A-z
+zahrnuji vsechna velka i mala pismena spolu  se  znaky  ^,`,_  ,
+[, \ a ]. Zacinat vsak musi pismenem.                           
+Nekolik prikladu navesti:                                       
+      LOOP                                                      
+      loop                                                      
+      L[1]                                                      
+      a                                                         
+      dve^5                                                     
+      LDIR    - neni navesti (rezervovane slovo)                
+                                                                
+2.3 Citac adres                                                 
+                                                                
+   Assembler se stara o citac  adres  tak,  ze  symbolu  v  poli
+navesti je prirazena  adresa  a  symbol  je  vlozen  do  tabulky
+symbolu. Citac adres muze byt  nastaven  na  libovolnou  hodnotu
+prikazem ORG (viz kap. 2.6).                                    
+   Symbol '$' muze byt pouzit ve vztahu k bezne  hodnote  citace
+adres tzn. LD HL,$+5 zpusobi nastaveni registroveho paru  HL  na
+hodnotu o 5 vetsi nez je soucasna hodnota citace adres.         
+                                                                
+2.4 Taublka symbolu                                             
+                                                                
+   Pri prvnim pouziti je  symbol  vlozen  do  tabulky  se  dvema
+ukazateli, ktere pozdeji oznacuji kde je symbol abecedne  ulozen
+mezi ostatnimi v tabukce. Pri  prvnim  vyskytu  symbolu  v  poli
+navesti je jeho hodnota (udana citacem adres nebo dana  prikazem
+EQU) vlozena  do  tabulky  symbolu.  Jinak  je  hodnota  vlozena
+jakmile je symbol postupne nalezen v poli navesti.              
+   Tento typ tabulky symbolu se nazyva binarne  vetveny  a  jeho
+struktura umoznuje vkladani  symbolu  a  jejich  vybirani  velmi
+rychle - dulezite u  rozsahlych  programu.  Velikost  vstupu  se
+pohybuje od 8 do 13 bytu v zavislosti na delce symbolu.         
+   Je-li pri prvnim prubehu symbol definovan  vice  nez  jednou,
+objevi se chybove  hlaseni  (*ERROR*  4)  nebot  assembler  nevi
+kterou hodnotu ma priradit symbolu.                             
+   Neni-li  symbolu  prirazena  hodnota,  objevi  se  na   konci
+prekladu zprava '*WARNING* symbol  absent'.  Chybejici  definice
+symbolu vsak neprerusi kompilaci.                               
+   Do tabulky symbolu se  vsak  vklada  pouze  prvnich  6  znaku
+symbolu, aby tabulka nebyla prilis rozsahla.                    
+   Na konci kompilace se objevi zprava, oznamujici kolik  pameti
+bylo pouzito tabulkou symbolu behem kompilace - velikost  pameti
+prirazene tabulce muzete upravit  na  zacatku  pri  odpovedi  na
+dotaz 'Table:'(viz kapitola 2.0).                               
+                                                                
+2.5 Vyrazy                                                      
+                                                                
+   Vyrazem je vstup operandu, ktery se sklada bud  z  jednoduche
+konstanty  nebo  z  nekolika  konstant  oddelenych    operatory.
+Definice konstant a operatoru je nasledujici:                   
+KONSTANTA  dekadicka konstanta napr. 1029                       
+           hexadecimalni konstanta napr. #405                   
+           binarni konstanta napr. %10001011                    
+           znakova konstanta napr. "a"                          
+           navesti napr. L1029                                  
+           rovnez '$' muze byt pouzit jako  konstanta  k  urceni
+           hodnoty citace adres.                                
+OPERATOR   '+'  soucet                                          
+           '-'  rozdil                                          
+           '&'  logicka funkce AND                              
+           '@'  logicka funkce OR                               
+           '!'  logicka funkce XOR                              
+           '*'  soucin celych cisel                             
+           '/'  podil celych cisel                              
+           '?'  funkce MOD (a?b=a-(a/b)*b)                      
+                                                                
+Poznamka:  '#'  oznacuje  zacatek  hexadecimalniho  cisla,   '%'
+binarniho cisla  a  '"'  znakovou  konstantu.  Pri  cteni  cisel
+(dekadickych, hexadecimalnich nebo binarnich) GENS 3 uvazuje  16
+bitu od  nejnizsi  hodnoty  (tj.  MOD  65536)  napr.:  70016  ma
+hodnotu 4480 a #5A2C4 ma hodnotu #A2C4.                         
+   Siroky sortiment operatoru  vsak  neumoznuje  zavorkovani  za
+ucelem volby priority vypoctu - vyrazy jsou provadeny vzdy zleva
+doprava. Operatory '*', '/' a '?' jsou provadeny samostatne  pro
+zjednoduseni a ne jako soucast celeho vyrazu,  coz  by  zvetsilo
+rozsah GENS 3.                                                  
+   Je-li vyraz  vlozen  v  zavorkach,  pak  predstavuje  neprime
+adresovani napr. v instrukci LD HL,(loc +5) se naplni registrovy
+par HL,16 bitovou hodnotou zapsanou na adrese 'loc +5'.         
+   Urcite instrukce Z80 (JR  a  DJNZ)  predpokladaji  8  bitovou
+hodnotu - toto  se  nazyva  relativni  adresovani.  Pri  pouziti
+relativniho adresovani GENS 3 automaticky odecte hodnotu  citace
+adres nastaveneho na nasledujici instrukci od hodnoty dane polem
+operandu uvazovane instrukce a tak ziska  relativni  adresu  pro
+danou instrukci. Rozsah pripustnych hodnot pro relativni  adresu
+je -128 az +127.                                                
+   V pripade, ze si prejete namisto toho vlozit primo  relativni
+vzdalenost  od  citace  adres,  musite    pouzit    znaku    '$'
+nasledovaneho pozadovanou hodnotou.  Nyni  se  relativni  adresa
+vztahuje primo k hodnote citace adres a tak se hodnota relativni
+adresy pohybuje v rozmezi -126 az +129 vcetne.                  
+                                                                
+Priklady platnych vyrazu                                        
+            #5000-label                                         
+            %1001101 ! %1011             da %1000110            
+            #3456 ? #1000                da #456                
+            4 + 5 * 3 - 8                da 19                  
+            $-label+8                                           
+            2345/7-1                     da 334                 
+            "A"+128                                             
+            "y"-";"+7                                           
+            (5 * label - #1000 & %1111)                         
+            17 @ %1000                   da 25                  
+                                                                
+   Mezery mohou byt vlozeny mezi konstanty a  operatory,  nikoli
+vsak uvnitr konstanty.                                          
+   Je-li vysledkem nasobeni absolutni hodnota  vetsi  nez  32767
+objevi se hlaseni *ERROR* 15 zatimco pri  deleni  nulou  ziskame
+hlaseni *ERROR* 14; preplneni je ignorovano. Veskera  aritmetika
+pouziva dvojkovy doplnek, kde vsechna cisla vetsi nez 32767 jsou
+povazovana za zaporna napr.: 60000= -5536 (60000-65536).        
+                                                                
+2.6 Ridici povely assembleru                                    
+                                                                
+   GENS 3 rozeznava urcite pseudoinstrukce. Tyto  ridici  povely
+assembleru, jak jsou nazyvany, nemaji vliv na procesor  Z80  pri
+jeho cinnosti, tj. nejsou prekladany do  strojniho  kodu,  pouze
+ridi assembler pri kompilaci. Tyto cinnosti svym zpusobem nemaji
+vliv na strojni kod tvoreny GENS 3.                             
+   Pseudoinstrukce jsou sestavovany presne stejne  jako  vykonne
+instrukce, muze jim predchazet navesti (nutne pro EQU)  a  mohou
+byt nasledovany komentarem. Tyto pseudoinstrukce jsou:          
+                                                                
+ORG  vyraz                                                      
+     nastavi citac adres na  hodnotu  'vyraz'.  Neni-li  zvolena
+     cinnost 2 nebo 16 a ORG by zpusobil prepsani GENS 3,  textu
+     nebo  tabulky  symbolu,  objevi  se  zprava  'Bad  ORG'   a
+     kompilace  se  prerusi.  Porobneji  viz  kapitola  2.0  jak
+     ovlivnuje cinnost 2 a 16 pouziti ORG.                      
+EQU  vyraz                                                      
+     musi predchazet navesti. Priradi navesti  hodnotu  'vyraz'.
+     Vyraz  nemuze  obsahovat  symbol,  kteremu  dosud    nebyla
+     prirazena hodnota (*ERROR* 13).                            
+DEFB vyraz, vyraz,...                                           
+     kazdy vyraz je vyhodnocen do 8 bitu; byte na adrese,  ktera
+     je v citaci adres je nastaven na hodnotu 'vyraz' a citac se
+     posune o 1. Opakuje se pro kazdy vyraz.                    
+DEFW vyraz, vyraz,...                                           
+     nastavi slovo (2 byte) na adrese, ktera je v  citaci  adres
+     na hodnotu 'vyraz' a posune citac o 2. Jako prvni se umisti
+     mene vyznamny byte nasledovany vyssim. Opakuje se pro kazdy
+     vyraz.                                                     
+DEFS vyraz                                                      
+     zvysi hodnotu citace adres o hodnotu 'vyraz' - odpovida to 
+     rezervovani bloku pameti o velikosti dane hodnotou 'vyraz'.
+DEFM "s"                                                        
+     definuje obsah n bytu v pameti a tyto  pak  obsahuji  ASCII
+     kod retezce  "s",  kde  n  je  delka  retezce  a  muze  byt
+     teoreticky dlouha 1 - 255. Prakticky je vsak delka  retezce
+     omezena delkou radku editoru. Prvni znak  pole  operandu  -
+     uvozovky - je vyhodnocen jako zacatek retezce a retezec  je
+     dan znaky mezi dvema uvozovkami; znak konec radku ma rovnez
+     vyznam konec retezce.                                      
+ENT  vyraz                                                      
+     nastavi  startovaci  adresu  strojniho  kodu  na    hodnotu
+     'vyraz'- pouziva se ve spojeni s prikazem editoru 'R'  (viz
+     kapitola 3). Pro startovaci  adresu  neexistuje  standardni
+     hodnota (default).                                         
+                                                                
+2.7 Podminene pseudoinstrukce                                   
+                                                                
+   Podminene  pseudoinstrukce  umoznuji  programatorovi   vlozit
+nebo vynechat urcite casti zdrojoveho textu v ramci kompilace.To
+se provadi pouzitim IF,ELSE a END.                              
+                                                                
+IF  vyraz                                                       
+    vyhodnoti 'vyraz'. Je-li vysledek  nula,  pak  se  neprovede
+    preklad  nasledujicich  radku  dokud assembler  nenarazi  na
+    'ELSE' nebo  'END'.  Je-li  hodnota  'vyraz'  nenulova,  pak
+    pokracuje kompilace normalne.                               
+ELSE                                                            
+    Tato pseudoinstrukce proste spousti  a  ukoncuje  kompilaci.
+    Je-li  kompilace  spustena  pred  'ELSE'  ,  pak   nasleduje
+    ukonceni a naopak.                                          
+END                                                             
+    END jednoduse spousti kompilaci.                            
+Poznamka:  Podminene  pseudoinstrukce  se  nesmeji  pouzivat  ve
+vicenasobnych cyklech; neprovadi se kontrola a pouziti  vede  na
+neurcity vysledek.                                              
+                                                                
+2.8 Prikazy assembleru                                          
+                
