@@ -1,0 +1,10 @@
+C:\Users\Mihula\Documents\VSCode\Twk2txt\bin\Debug\netcoreapp1.1\Twk2txt.deps.json
+C:\Users\Mihula\Documents\VSCode\Twk2txt\bin\Debug\netcoreapp1.1\Twk2txt.runtimeconfig.json
+C:\Users\Mihula\Documents\VSCode\Twk2txt\bin\Debug\netcoreapp1.1\Twk2txt.runtimeconfig.dev.json
+C:\Users\Mihula\Documents\VSCode\Twk2txt\bin\Debug\netcoreapp1.1\Twk2txt.dll
+C:\Users\Mihula\Documents\VSCode\Twk2txt\bin\Debug\netcoreapp1.1\Twk2txt.pdb
+C:\Users\Mihula\Documents\VSCode\Twk2txt\obj\Debug\netcoreapp1.1\Twk2txt.csproj.CoreCompileInputs.cache
+C:\Users\Mihula\Documents\VSCode\Twk2txt\obj\Debug\netcoreapp1.1\Twk2txt.AssemblyInfoInputs.cache
+C:\Users\Mihula\Documents\VSCode\Twk2txt\obj\Debug\netcoreapp1.1\Twk2txt.AssemblyInfo.cs
+C:\Users\Mihula\Documents\VSCode\Twk2txt\obj\Debug\netcoreapp1.1\Twk2txt.dll
+C:\Users\Mihula\Documents\VSCode\Twk2txt\obj\Debug\netcoreapp1.1\Twk2txt.pdb
