@@ -82,17 +82,10 @@ namespace Twk2txt
       {0x9F,' '},      
     };
 
-    private byte[] textLine = new byte[64];
-    private String stextLine = String.Empty;
-
     private StringBuilder sbTextLine = new StringBuilder();
-    //private int linePos = 0;
 
     private FileStream input;
     private FileStream output;
-
-
-    
 
     public Converter(string inputFilePath, string outputFilePath)
     {
@@ -115,12 +108,6 @@ namespace Twk2txt
         }
         else
         {
-          // if (inpByte > 0x7F) // && inpByte < 0xA5)
-          // {
-          //   // translate national char > 0x7F
-          //   inpByte = (int)'?';
-          // }
-
           // unpack last character (repeat x)
           // continue, if repeat is 0
           while (repeat > 0)
@@ -129,7 +116,6 @@ namespace Twk2txt
             repeat--; 
             // repeat = 0;
           }
-         
 
           WriteChar(inpByte);
 
@@ -143,12 +129,6 @@ namespace Twk2txt
         Console.WriteLine(sbTextLine.ToString());
         output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()),0,sbTextLine.Length);
       }
-
-      //if (linePos > 0)
-      // for (int i=0;i < linePos;i++)
-      //   WriteChar(textLine[i]);
-      //Console.WriteLine(String.Concat(textLine).Substring(0, linePos));
-        
        output.Flush();
         
     }
@@ -156,24 +136,13 @@ namespace Twk2txt
     private void WriteChar(int charInt)
     {
       if (charInt > 0x7F)
-        //textLine[linePos++] = System.Convert.ToByte(taswordCZ[character]);
-        //stextLine = String.Concat(stextLine,taswordCZ[character]);
         sbTextLine.Append(taswordCZ[charInt]);
       else
-        //textLine[linePos++] = (byte)character;
-        //stextLine = String.Concat(stextLine,System.Convert.ToChar(character));
         sbTextLine.Append(System.Convert.ToChar(charInt));
 
-      //if (++linePos == 64)
       if (sbTextLine.Length == 64)
       {
-        //linePos = 0;
-        //Console.WriteLine(System.Text.Encoding.ASCII.GetString(textLine));
-        //Console.WriteLine(stextLine);
-        //stextLine = string.Empty;
-        
         Console.WriteLine(sbTextLine.ToString());
-
 
         output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()),0,64);
         output.WriteByte(0x0D);
