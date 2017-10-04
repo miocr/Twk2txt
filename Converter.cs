@@ -141,14 +141,16 @@ namespace Twk2txt
       if (sbTextLine.Length > 0 )
       {
         Console.WriteLine(sbTextLine.ToString());
+        output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()),0,sbTextLine.Length);
       }
 
       //if (linePos > 0)
       // for (int i=0;i < linePos;i++)
       //   WriteChar(textLine[i]);
-      
-        //Console.WriteLine(String.Concat(textLine).Substring(0, linePos));
-
+      //Console.WriteLine(String.Concat(textLine).Substring(0, linePos));
+        
+       output.Flush();
+        
     }
 
     private void WriteChar(int charInt)
@@ -172,10 +174,11 @@ namespace Twk2txt
         
         Console.WriteLine(sbTextLine.ToString());
 
+
         output.Write(Encoding.UTF8.GetBytes(sbTextLine.ToString()),0,64);
         output.WriteByte(0x0D);
         output.WriteByte(0x0A);
-        
+
         sbTextLine.Clear();
       }
     }
