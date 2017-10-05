@@ -17,10 +17,10 @@
             "preLaunchTask": "build",
             "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/Twk2txt.dll",
             "windows": {
-                "args": ["files\\*.dtt",""]
+                "args": ["files\\*.*",""]
             },
             "osx": {
-                "args": ["GENS3E.bin","GENS3E.txt"]
+                "args": ["files/*.twt",""]
             },
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,

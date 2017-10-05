@@ -8,7 +8,7 @@ namespace ZXt2txt
 
     class TAPUtils
     {
-        public Dictionary<int, string> zxTokens = new Dictionary<int, string>
+        private Dictionary<int, string> zxTokens = new Dictionary<int, string>
         {
           {0xA0,"(Q)"},
           {0xA1,"(R)"},
@@ -107,7 +107,147 @@ namespace ZXt2txt
           {0xFE,"RETURN"},
           {0xFF,"COPY"}
         };
-        private class FileHeader {
+
+        private FileStream input;
+        private FileStream output;
+        byte[] tapWord = new byte[2];
+        byte[] tapFileName = new byte[10];
+        byte[] tapHeaderBlock = new byte[19];
+        byte[] tapDataBlock;
+        byte tapDataBlockFlag;
+        byte tapDataBlockDataType;
+        int tapHeaderCodeLength;
+        int tapHeaderCodeStart;
+        int tapBlockLength;
+        int tapCheckSum;
+        int ret;
+
+        public string GetZXTokenString(int code)
+        {
+            if (zxTokens.ContainsKey(code))
+                return zxTokens[code];
+            else
+                return string.Empty;
+        }
+        public void ExportCodeBlocks(string tapFileNamePath)
+        {
+            input = File.OpenRead(tapFileNamePath);
+
+            while ((ret = input.Read(tapWord, 0, 2)) == 2)
+            {
+                tapBlockLength = BitConverter.ToUInt16(tapWord,0);
+                //tapHeaderCodeStart = 0;
+                //tapHeaderCodeLength = 0;
+                ReadTapBlock(tapBlockLength);
+
+                // check last block type 
+                if (tapDataBlockFlag == 255)
+                {
+                    // last block was CODE/SCREEN$ 
+                    string fileName;
+                    if (tapDataBlockDataType == 3) 
+                    {
+                       fileName  = SaveDataBlock();
+                       if (string.IsNullOrEmpty(fileName))
+                       {
+                           // not saved
+                       }
+                    }
+
+                    
+                }
+            }
+        }
+
+        private void ReadTapBlock(int tapBlockLength)
+        {
+                
+                // First byte from data block = flag
+                tapDataBlockFlag = (byte)input.ReadByte(); 
+                if (tapDataBlockFlag == 0 && tapBlockLength == 19)
+                {
+                    // header 
+                    tapHeaderBlock[0] = tapDataBlockFlag;
+                   
+                    // read rest header values (without tapDataBlockFlag )
+                    input.Read(tapHeaderBlock,1,tapBlockLength - 1);
+                    tapDataBlockDataType = tapHeaderBlock[1]; // DULEZITE
+                    tapHeaderCodeLength = BitConverter.ToUInt16(tapHeaderBlock,12);
+                    if (tapDataBlockDataType == 3) // CODE and SCREEN data block
+                        tapHeaderCodeStart = BitConverter.ToUInt16(tapHeaderBlock,14);
+
+                    //FileHeader header = new FileHeader(tapHeaderBlock);
+                }
+
+                // flag of header data block (data for last header)
+                if (tapDataBlockFlag == 0xFF && ((tapBlockLength -2) == tapHeaderCodeLength))
+                {
+                    tapDataBlock = new byte[tapBlockLength -2];
+                    input.Read(tapDataBlock,0,tapBlockLength -2);
+                    tapCheckSum = input.ReadByte();
+                }
+
+
+        }
+
+        private string SaveDataBlock()
+        {
+            // ZX file name conversion (codes > 0x7F)
+            Array.Copy(tapHeaderBlock,2,tapFileName,0,10);
+
+            StringBuilder sbFileName = new StringBuilder();
+            for (int i = 0; i < 10; i++)
+            {
+                if (tapFileName[i] > 0x7F || (tapFileName[i] < 0x20))
+                {
+                    // replace CODES from BASIC TOKENS etc.
+                    //tapFileName[i] = (byte)'_';
+                    sbFileName.Append(GetZXTokenString(tapFileName[i]));
+                }
+                else
+                {
+                    sbFileName.Append(Encoding.UTF8.GetString(tapFileName,i,1));
+                }
+            }
+  
+            string fileExtension;//  = ".xxx"; // unknown
+            if (tapHeaderCodeStart == 32000)
+            {
+                fileExtension  = ".twt"; // tasword
+            }
+            else if  (tapHeaderCodeStart == 32768)
+            {
+                fileExtension  = ".dtt"; // d-text (spectral writer)
+            }
+            else
+            {
+              
+                Console.WriteLine("NOT tsw/dtx file: " + sbFileName.ToString());
+                  return null;
+            }
+
+            //Path.Combine(Encoding.UTF8.GetString(tapFileName) + fileExtension);
+            sbFileName.Append(fileExtension);
+            string fileName = sbFileName.ToString();
+            foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+            {
+                fileName = fileName.Replace(c, '_');
+            }
+
+            output = File.OpenWrite(Path.Combine("files",fileName));
+            output.Write(tapDataBlock, 0, tapDataBlock.Length);
+            output.Flush();
+            output.Dispose();
+
+            Console.WriteLine("Saved: " + fileName);
+
+            return fileName;
+
+        }
+
+    }
+
+    class FileHeader {
             byte flag;
             byte dataType;
             //byte[] fileName = new byte[10];
@@ -132,17 +272,20 @@ namespace ZXt2txt
                 //Array.Copy(headBytes,2,fileName,0,10);
 
                 StringBuilder sb = new StringBuilder();
+                TAPUtils utils = new TAPUtils();
+                
                 for (int i = 2; i < 12; i++)
                 {
                     if (headBytes[i] >= 0xA0)
                     {
-                    sb.Append(zxTokens[headBytes[i]]);
-
-
+                        sb.Append(utils.GetZXTokenString(headBytes[i]));
                     }
-                    sb.Append(Encoding.UTF8.GetString(headBytes,i,1));
-
+                    else
+                    {
+                        sb.Append(Encoding.UTF8.GetString(headBytes,i,1));
+                    }
                 }
+                fileName = sb.ToString();
 
                 //fileName = Encoding.UTF8.GetString(headBytes,2,10);
                 dataLength = BitConverter.ToUInt16(headBytes,12);
@@ -151,127 +294,5 @@ namespace ZXt2txt
             }
 
         }
-        private FileStream input;
-        private FileStream output;
-        byte[] tapWord = new byte[2];
-        byte[] tapFileName = new byte[10];
-        byte[] tapHeaderBlock = new byte[19];
-        byte[] tapDataBlock;
-        byte tapDataBlockFlag;
-        int tapHeaderCodeLength;
-        int tapHeaderCodeStart;
-        int tapBlockLength;
-        int tapCheckSum;
-        int ret;
-
-        public void ExportCodeBlocks(string tapFileNamePath)
-        {
-            input = File.OpenRead(tapFileNamePath);
-
-            while ((ret = input.Read(tapWord, 0, 2)) == 2)
-            {
-                tapBlockLength = BitConverter.ToUInt16(tapWord,0);
-                ReadTapBlock(tapBlockLength);
-
-                // check last block type 
-                if (tapDataBlockFlag == 255)
-                {
-                    // last block was CODE/SCREEN$ 
-                    string fileName = SaveDataBlock();
-
-#region Converting
-                    // Converter converter = new Converter();
-                    // CodingType coding = CodingType.zxGraphics;
-                    // switch (tapHeaderCodeStart)
-                    // {
-                    //     case 32768: 
-                    //         coding = CodingType.dTextCZ;
-                    //         break;
-                    //     case 32000:
-                    //         coding = CodingType.tasswordCZ;
-                    //         break;
-                    // }
-                    // converter.Convert(
-                    //     Path.Combine("files",fileName),
-                    //     Path.Combine("files",fileName + ".txt"),
-                    //     coding);
-#endregion                        
-                    
-                }
-            }
-        }
-
-        private void ReadTapBlock(int tapBlockLength)
-        {
-                
-                // First byte from data block = flag
-                tapDataBlockFlag = (byte)input.ReadByte(); 
-                if (tapDataBlockFlag == 0 && tapBlockLength == 19)
-                {
-                    // header 
-                    tapHeaderBlock[0] = tapDataBlockFlag;
-                   
-                    // read rest header values (without tapDataBlockFlag )
-                    input.Read(tapHeaderBlock,1,tapBlockLength - 1);
-
-                    tapHeaderCodeLength = BitConverter.ToUInt16(tapHeaderBlock,12);
-                    if (tapHeaderBlock[1] == 3) // CODE and SCREEN data block
-                        tapHeaderCodeStart = BitConverter.ToUInt16(tapHeaderBlock,14);
-
-                    FileHeader header = new FileHeader(tapHeaderBlock);
-                }
-
-                // flag of header data block (data for last header)
-                if (tapDataBlockFlag == 0xFF && ((tapBlockLength -2) == tapHeaderCodeLength))
-                {
-                    tapDataBlock = new byte[tapHeaderCodeLength];
-                    input.Read(tapDataBlock,0,tapHeaderCodeLength);
-                    tapCheckSum = input.ReadByte();
-                }
-
-
-        }
-
-        private string SaveDataBlock()
-        {
-            // ZX file name conversion (codes > 0x7F)
-            Array.Copy(tapHeaderBlock,2,tapFileName,0,10);
-
-            for (int i = 0; i < 10; i++)
-            {
-                if (tapFileName[i] > 0x7F || (tapFileName[i] < 0x20))
-                {
-                    // replace CODES from BASIC TOKENS etc.
-                    tapFileName[i] = (byte)'_';
-                }
-            }
-
-            string fileExtension  = ".xxx"; // unknown
-            if (tapHeaderCodeStart == 32000)
-            {
-                fileExtension  = ".twt"; // tasword
-            }
-            else if  (tapHeaderCodeStart == 32768)
-            {
-                fileExtension  = ".dtt"; // d-text (spectral writer)
-            }
-
-            string fileName = Path.Combine(Encoding.UTF8.GetString(tapFileName) + fileExtension);
-            foreach (char c in System.IO.Path.GetInvalidFileNameChars())
-            {
-                fileName = fileName.Replace(c, '_');
-            }
-            output = File.OpenWrite(Path.Combine("files",fileName));
-            output.Write(tapDataBlock, 0, tapDataBlock.Length);
-            output.Flush();
-            output.Dispose();
-
-            Console.WriteLine("Saved: " + fileName);
-
-            return fileName;
-
-        }
-
-    }
 
 }
