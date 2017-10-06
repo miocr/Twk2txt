@@ -15,9 +15,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/Twk2txt.dll",
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/ZXt2txt.dll",
             "windows": {
-                "args": ["files\\*.*",""]
+                "args": ["files\\*.tbt",""]
             },
             "osx": {
                 "args": ["files/*.twt",""]
@@ -25,36 +25,6 @@
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,
             "console": "internalConsole"
-        },
-        {
-            "name": ".NET Core Launch (web)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/Twk2txt.dll",
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": false,
-            "launchBrowser": {
-                "enabled": true,
-                "args": "${auto-detect-url}",
-                "windows": {
-                    "command": "cmd.exe",
-                    "args": "/C start ${auto-detect-url}"
-                },
-                "osx": {
-                    "command": "open"
-                },
-                "linux": {
-                    "command": "xdg-open"
-                }
-            },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceRoot}/Views"
-            }
         },
         {
             "name": ".NET Core Attach",

@@ -5,17 +5,17 @@ using System.Collections.Generic;
 
 namespace ZXt2txt
 {
-
     public enum CodingType
     {
         zxGraphics = 0,
-        tasswordCZ = 1,
-        dTextCZ = 2
+        tasword2CZ = 1,
+        dTextCZ = 2,
+        tasword2BCS = 3
     }
 
     class Converter
     {
-        private Dictionary<int, char> taswordCZ = new Dictionary<int, char>
+        private Dictionary<int, char> tasword2CZ = new Dictionary<int, char>
         {
           {0x80,'é'},
           {0x81,'ě'},
@@ -48,7 +48,106 @@ namespace ZXt2txt
           {0x9C,'M'},
           {0x9D,'N'},
           {0x9E,'O'},
-          {0x9F,'P'},
+          {0x9F,'P'}
+        };
+        private Dictionary<int, char> tasword2BCS = new Dictionary<int, char>
+        {
+          {0xA0,' '},
+          {0xA1,' '},
+          {0xA2,' '},
+          {0xA3,' '},
+          {0xA4,' '},
+          {0xA5,'ľ'},
+          {0xA6,'š'},
+          {0xA7,'č'},
+          {0xA8,'ř'},
+          {0xA9,'ž'},
+          {0xAA,'ý'},
+          {0xAB,'á'},
+          {0xAC,'í'},
+          {0xAD,'é'},
+          {0xAE,'Ľ'},
+          {0xAF,'Š'},
+          {0xB0,'Č'},
+          {0xB1,'Ř'},
+          {0xB2,'Ž'},
+          {0xB3,'Ý'},
+          {0xB4,'Á'},
+          {0xB5,'Í'},
+          {0xB6,'É'},
+          {0xB7,'ä'},
+          {0xB8,'°'},
+          {0xB9,'ď'},
+          {0xBA,'ĺ'},
+          {0xBB,'ó'},
+          {0xBC,'ô'},
+          {0xBD,'ť'},
+          {0xBE,'ů'},
+          {0xBF,'ú'},
+          {0xC0,'Ä'},
+          {0xC1,'O'},
+          {0xC2,'Ď'},
+          {0xC3,'Ľ'},
+          {0xC4,'Ó'},
+          {0xC5,'Ô'},
+          {0xC6,'Ť'},
+          {0xC7,'U'},
+          {0xC8,'Ú'},
+          {0xC9,'ň'},
+          {0xCA,'ŕ'},
+          {0xCB,'ě'},
+          {0xCC,'Ň'},
+          {0xCD,'Ŕ'},
+          {0xCE,'É'},
+          {0xCF,' '},
+          {0xD0,' '},
+          {0xD1,' '},
+          {0xD2,' '},
+          {0xD3,' '},
+          {0xD4,' '},
+          {0xD5,' '},
+          {0xD6,' '},
+          {0xD7,' '},
+          {0xD8,' '},
+          {0xD9,' '},
+          {0xDA,' '},
+          {0xDB,' '},
+          {0xDC,' '},
+          {0xDD,' '},
+          {0xDE,' '},
+          {0xDF,' '},
+          {0xE0,' '},
+          {0xE1,' '},
+          {0xE2,' '},
+          {0xE3,' '},
+          {0xE4,' '},
+          {0xE5,' '},
+          {0xE6,' '},
+          {0xE7,' '},
+          {0xE8,' '},
+          {0xE9,' '},
+          {0xEA,' '},
+          {0xEB,' '},
+          {0xEC,' '},
+          {0xED,' '},
+          {0xEE,' '},
+          {0xEF,' '},
+          {0xF0,' '},
+          {0xF1,' '},
+          {0xF2,' '},
+          {0xF3,' '},
+          {0xF4,' '},
+          {0xF5,' '},
+          {0xF6,' '},
+          {0xF7,' '},
+          {0xF8,' '},
+          {0xF9,' '},
+          {0xFA,' '},
+          {0xFB,' '},
+          {0xFC,' '},
+          {0xFD,' '},
+          {0xFE,' '},
+          {0xFF,' '}
         };
         private Dictionary<int, char> dTextCZ = new Dictionary<int, char>
         {
@@ -84,7 +183,7 @@ namespace ZXt2txt
           {0x9C,'ů'},
           {0x9D,'ý'},
           {0x9E,'ž'},
-          {0x9F,' '},
+          {0x9F,' '}
         };
         private Dictionary<int, char> zxGraphics = new Dictionary<int, char>
         {
@@ -120,7 +219,7 @@ namespace ZXt2txt
           {0x9C,'M'},
           {0x9D,'N'},
           {0x9E,'O'},
-          {0x9F,'P'},
+          {0x9F,'P'}
         };
         public Dictionary<int, string> zxTokens = new Dictionary<int, string>
         {
@@ -222,15 +321,11 @@ namespace ZXt2txt
           {0xFF,"COPY"}
         };
         private Dictionary<int, char> codingDict;
-
         private StringBuilder sbTextLine = new StringBuilder();
-
         private FileStream input;
         private FileStream output;
-
         private Encoding enc = Encoding.GetEncoding("UTF-8");
         private byte[] charsEncoded;
-
         public Converter()
         {
         }
@@ -247,11 +342,14 @@ namespace ZXt2txt
                 case CodingType.zxGraphics:
                     codingDict = zxGraphics;
                     break;
-                case CodingType.tasswordCZ:
-                    codingDict = taswordCZ;
+                case CodingType.tasword2CZ:
+                    codingDict = tasword2CZ;
                     break;
                 case CodingType.dTextCZ:
                     codingDict = dTextCZ;
+                    break;
+                case CodingType.tasword2BCS:
+                    codingDict = tasword2BCS;
                     break;
             }
 
@@ -261,7 +359,8 @@ namespace ZXt2txt
 
             while ((currentChar = input.ReadByte()) != -1)
             {
-                if (currentChar >= 0xA5)
+                // CodingType.tasword2BCS hasn't compression, but uses valus > 0XA0 for natioanal chars
+                if (currentChar >= 0xA5 && coding != CodingType.tasword2BCS)
                 {
                     // lastchar was packed > count total repetition of lastchar for unpack 
                     repeat = repeat + (currentChar - 0xA5 + 1);
@@ -295,9 +394,8 @@ namespace ZXt2txt
 
         private void WriteChar(int charInt)
         {
-            if (charInt > 0x7F && charInt < 0xA0)
+            if (charInt > 0x7F)// && charInt < 0xA0)
             {
-                //sbTextLine.Append(taswordCZ[charInt]);
                 sbTextLine.Append(codingDict[charInt]);
             }
             else
