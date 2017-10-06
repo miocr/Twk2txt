@@ -10,14 +10,15 @@ namespace ZXt2txt
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("Convert ZX Spectrum CODE block with Tasword or D-TEXT(SpectralWriter) text to UTF-8 plain text file");
-                Console.WriteLine("CIDSOFT (C)2017, version 1.0");
+                Console.WriteLine("");
+                Console.WriteLine("Convert ZX Spectrum CODE block with Tasword or D-TEXT(SpectralWriter) text to UTF-8 plain text file. CIDSOFT (C)2017, version 1.0");
                 Console.WriteLine("");
                 Console.WriteLine("Usage: ZXt2txt file(s) [coding]");
-                Console.WriteLine("file(s): file path name or path with mask");
-                Console.WriteLine("coding:  tw2cz, tw2bcs, dtcz");
+                Console.WriteLine(" > file(s): file or mask ('mrs1.tw2cz','files/*.dtcz'...)");
+                Console.WriteLine(" > coding:  tw2cz, tw2bcs, dtcz");
+                Console.WriteLine("");
                 Console.WriteLine("If coding isn't set, converter use coding by file extension (same asi coding).");
-                return;    
+                return;
             }
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), args[0]);
             string dirPath = Path.GetDirectoryName(fullPath);
@@ -25,40 +26,34 @@ namespace ZXt2txt
             List<string> inFiles = new List<string>(Directory.GetFiles(dirPath, fileName));
             if (inFiles.Count > 0)
             {
-                Converter converter = new Converter();
-                CodingType coding = CodingType.zxGraphics; // default
-
-                if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
+                foreach (string inFile in inFiles)
                 {
-                    // set CodingType by commandline parameter
-                    switch (args[1])
+                    Converter converter = new Converter();
+                    string condingFlag;
+                    if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
+                    {
+                        condingFlag = args[1];
+                    }
+                    else
+                    {
+                        condingFlag = Path.GetExtension(inFile);
+                        condingFlag = condingFlag.Remove(0,1);
+                    }
+
+                    // set Coding by commandline parameter / file extension
+                    switch (condingFlag)
                     {
                         case "tw2cz":
-                            coding = CodingType.tasword2CZ;
+                            converter.Coding = CodingType.tasword2CZ;
                             break;
                         case "tw2bcs":
-                            coding = CodingType.tasword2BCS;
+                            converter.Coding = CodingType.tasword2BCS;
                             break;
                         case "dtcz":
-                            coding = CodingType.dTextCZ;
+                            converter.Coding = CodingType.dTextCZ;
                             break;
                     }
-                }
-                else
-                {
-                    // auto set CodingType by file extension
-                    foreach (string inFile in inFiles)
-                    {
-                        string fileExtension = Path.GetExtension(inFile);
-                        if (fileExtension == ".twt")
-                            coding = CodingType.tasword2CZ;
-                        else if (fileExtension == ".tbt")
-                            coding = CodingType.tasword2BCS;
-                        else if (fileExtension == ".dtt")
-                            coding = CodingType.dTextCZ;
-
-                        converter.Convert(inFile, inFile + ".txt", coding);
-                    }
+                    converter.Convert(inFile, inFile + ".txt");
                 }
             }
         }

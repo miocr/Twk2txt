@@ -17,10 +17,10 @@
             "preLaunchTask": "build",
             "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/ZXt2txt.dll",
             "windows": {
-                "args": ["files\\*.tbt",""]
+                "args": ["files\\*.tw2bcs",""]
             },
             "osx": {
-                "args": ["files/*.twt",""]
+                "args": ["files/*.tw2bcs",""]
             },
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,

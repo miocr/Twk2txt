@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace ZXt2txt
 {
+
     public enum CodingType
     {
         zxGraphics = 0,
@@ -12,10 +13,32 @@ namespace ZXt2txt
         dTextCZ = 2,
         tasword2BCS = 3
     }
-
     class Converter
     {
-        private Dictionary<int, char> tasword2CZ = new Dictionary<int, char>
+        public CodingType Coding
+        {
+            set {
+                switch (value)
+                {
+                    case (CodingType.tasword2CZ):
+                        codingDict = dictTasword2CZ;
+                        break;
+                    case (CodingType.tasword2BCS):
+                        codingDict = dictTasword2BCS;
+                        break;
+                    case (CodingType.dTextCZ):
+                        codingDict = dictDTextCZ;
+                        break;
+                    default:
+                        codingDict = dictZXgraphics;
+                        break;
+                        ;
+                }
+            }
+        }
+        private Dictionary<int, char> codingDict;
+
+        private Dictionary<int, char> dictTasword2CZ = new Dictionary<int, char>
         {
           {0x80,'é'},
           {0x81,'ě'},
@@ -50,7 +73,7 @@ namespace ZXt2txt
           {0x9E,'O'},
           {0x9F,'P'}
         };
-        private Dictionary<int, char> tasword2BCS = new Dictionary<int, char>
+        private Dictionary<int, char> dictTasword2BCS = new Dictionary<int, char>
         {
           {0xA0,' '},
           {0xA1,' '},
@@ -149,7 +172,7 @@ namespace ZXt2txt
           {0xFE,' '},
           {0xFF,' '}
         };
-        private Dictionary<int, char> dTextCZ = new Dictionary<int, char>
+        private Dictionary<int, char> dictDTextCZ = new Dictionary<int, char>
         {
           {0x80,'Á'},
           {0x81,'Č'},
@@ -185,7 +208,7 @@ namespace ZXt2txt
           {0x9E,'ž'},
           {0x9F,' '}
         };
-        private Dictionary<int, char> zxGraphics = new Dictionary<int, char>
+        private Dictionary<int, char> dictZXgraphics = new Dictionary<int, char>
         {
           // char replacement for semigraphics
           {0x80,' '},
@@ -221,7 +244,8 @@ namespace ZXt2txt
           {0x9E,'O'},
           {0x9F,'P'}
         };
-        public Dictionary<int, string> zxTokens = new Dictionary<int, string>
+        /*
+        public Dictionary<int, string> dictZXtokens = new Dictionary<int, string>
         {
           {0xA0,"(Q)"},
           {0xA1,"(R)"},
@@ -320,38 +344,29 @@ namespace ZXt2txt
           {0xFE,"RETURN"},
           {0xFF,"COPY"}
         };
-        private Dictionary<int, char> codingDict;
+         */
         private StringBuilder sbTextLine = new StringBuilder();
         private FileStream input;
         private FileStream output;
         private Encoding enc = Encoding.GetEncoding("UTF-8");
         private byte[] charsEncoded;
+        
         public Converter()
         {
+            // default map for chars > 0x7F
+            codingDict = dictZXgraphics;
         }
 
-        public void Convert(string inputFilePath, string outputFilePath, CodingType coding)
+        public void Convert(string inputFilePath, string outputFilePath)
         {
+            if (string.IsNullOrEmpty(inputFilePath) || !File.Exists(inputFilePath))
+                return;
+
             // in/out files
+            if (string.IsNullOrEmpty(outputFilePath))
+                outputFilePath = inputFilePath + ".txt";
             input = File.OpenRead(inputFilePath);
             output = File.OpenWrite(outputFilePath);
-
-            // choose dictionary for recoding chars 0x80-0x9F
-            switch (coding)
-            {
-                case CodingType.zxGraphics:
-                    codingDict = zxGraphics;
-                    break;
-                case CodingType.tasword2CZ:
-                    codingDict = tasword2CZ;
-                    break;
-                case CodingType.dTextCZ:
-                    codingDict = dTextCZ;
-                    break;
-                case CodingType.tasword2BCS:
-                    codingDict = tasword2BCS;
-                    break;
-            }
 
             int repeat = 0;
             int previousChar = 32;
@@ -360,7 +375,7 @@ namespace ZXt2txt
             while ((currentChar = input.ReadByte()) != -1)
             {
                 // CodingType.tasword2BCS hasn't compression, but uses valus > 0XA0 for natioanal chars
-                if (currentChar >= 0xA5 && coding != CodingType.tasword2BCS)
+                if (currentChar >= 0xA5 && codingDict != dictTasword2BCS)
                 {
                     // lastchar was packed > count total repetition of lastchar for unpack 
                     repeat = repeat + (currentChar - 0xA5 + 1);
