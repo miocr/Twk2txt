@@ -400,7 +400,7 @@ namespace ZXt2txt
 
             }
 
-            // write last line, if exists (is shorten than 64 chars)
+            // write last line, if exists (is shorten than 64 chars). 
             if (sbTextLine.Length > 0)
             {
                 WriteLine();
