@@ -15,12 +15,12 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/netcoreapp1.1/ZXt2txt.dll",
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp2.0/ZXt2txt.dll",
             "windows": {
-                "args": ["files\\*.tw2bcs",""]
+                "args": ["Sample\\GENS3E.tw2cz",""]
             },
             "osx": {
-                "args": ["files/*.tw2bcs",""]
+                "args": ["Sample/GENS3E.tw2cz",""]
             },
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,

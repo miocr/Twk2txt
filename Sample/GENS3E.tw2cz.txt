@@ -167,7 +167,7 @@ co  snaživí  spektrálníci  používají.  Když  si  ovšem   zkusíte
 vyprintit kus programu, budete půl hodiny hledět, co to  z  toho
 krámu vlastně  leze.  Proto  předesílám  dříve  než  se  zlostní
 spektrouni vražedně vrhnou na svou nebohou  tiskárnu,  že  chyba
-NEN I v  tiskárně.  Takovým  raději  poradím,  aby  před  tiskem
+NENLI v  tiskárně.  Takovým  raději  poradím,  aby  před  tiskem
 provedli "POKE start editoru +4837,0: POKE start +6511,0". Kdyby
 tam snad potom někdo chtěl strkat to, co tam bylo původně,  může
 tam pouknout třeba 37 a 6, když nevymyslí nic lepšího.          

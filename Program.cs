@@ -17,7 +17,7 @@ namespace ZXt2txt
                 Console.WriteLine(" > file(s): file or mask ('mrs1.tw2cz','files/*.dtcz'...)");
                 Console.WriteLine(" > coding:  tw2cz, tw2bcs, dtcz");
                 Console.WriteLine("");
-                Console.WriteLine("If coding isn't set, converter use coding by file extension (same asi coding).");
+                Console.WriteLine("If coding isn't set, converter use coding by file extension (same as coding).");
                 return;
             }
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), args[0]);
