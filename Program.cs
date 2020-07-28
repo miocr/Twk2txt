@@ -13,7 +13,7 @@ namespace ZXt2txt
                 Console.WriteLine("");
                 Console.WriteLine("Convert ZX Spectrum CODE block with Tasword or D-TEXT(SpectralWriter) text to UTF-8 plain text file. CIDSOFT (C)2017, version 1.0");
                 Console.WriteLine("");
-                Console.WriteLine("Usage: ZXt2txt file(s) [coding]");
+                Console.WriteLine("Usage: dotnet run file(s) [coding]");
                 Console.WriteLine(" > file(s): file or mask ('mrs1.tw2cz','files/*.dtcz'...)");
                 Console.WriteLine(" > coding:  tw2cz, tw2bcs, dtcz");
                 Console.WriteLine("");
@@ -55,6 +55,10 @@ namespace ZXt2txt
                     }
                     converter.Convert(inFile, inFile + ".txt");
                 }
+            }
+            else
+            {
+                Console.WriteLine($"No file(s) found. ({args[0]})");
             }
         }
     }
