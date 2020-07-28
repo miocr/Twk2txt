@@ -8,10 +8,10 @@ namespace ZXt2txt
 
     public enum CodingType
     {
-        zxGraphics = 0,
-        tasword2CZ = 1,
-        dTextCZ = 2,
-        tasword2BCS = 3
+        zxGraphics = 0, // Screen
+        tasword2CZ = 1, // Tasword2 CZ (compressed, lowercase CZ diacritics)
+        dTextCZ = 2,   // D-Text CZ (compressed, lowercase CZ diacritics)ok
+        tasword2BCS = 3 // Tasword2 CZ (uncompressed, full CZ diacritics)
     }
     class Converter
     {
